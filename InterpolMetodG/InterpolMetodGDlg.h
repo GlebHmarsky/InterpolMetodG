@@ -31,4 +31,20 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnEnChangeEditA();
+
+	CEdit m_ControlBorderA;
+	CEdit m_ControlBorderB;
+	CEdit m_ControlBorderD;
+	CEdit m_ControlBorderC;
+	CEdit m_ControlParamAlpha;
+	CEdit m_ControlParamBeta;
+	CEdit m_ControlParamGamma;
+	CEdit m_ControlParamDelta;
+	CEdit m_ContolParamEpsi;
+	CEdit m_ControlParamMu;
+	afx_msg void OnEnChangeEditB();
+	afx_msg void OnEnChangeEditC();
+	afx_msg void OnEnChangeEditD();
 };
