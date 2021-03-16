@@ -32,8 +32,8 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnEnChangeEditA();
 
+	afx_msg void OnEnChangeEditA();
 	CEdit m_ControlBorderA;
 	CEdit m_ControlBorderB;
 	CEdit m_ControlBorderD;
@@ -57,4 +57,8 @@ public:
 	afx_msg void OnBnClickedCheckmainfunc();
 	afx_msg void OnEnChangeEditnumknots();
 	BOOL m_MainFunc;
+	BOOL m_DiffMainFunc;
+	BOOL m_Poly;
+	BOOL m_DiffPoly;
+	BOOL m_Raznost;
 };

@@ -59,6 +59,11 @@ END_MESSAGE_MAP()
 
 CInterpolMetodGDlg::CInterpolMetodGDlg(CWnd* pParent /*=nullptr*/)
 	: CDialog(IDD_INTERPOLMETODG_DIALOG, pParent)
+	, m_MainFunc(TRUE)
+	, m_DiffMainFunc(FALSE)
+	, m_Poly(FALSE)
+	, m_DiffPoly(FALSE)
+	, m_Raznost(FALSE)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -77,6 +82,11 @@ void CInterpolMetodGDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_delta, m_ControlParamDelta);
 	DDX_Control(pDX, IDC_epsi, m_ControlParamEpsi);
 	DDX_Control(pDX, IDC_mu, m_ControlParamMu);
+	DDX_Check(pDX, IDC_CHECKMainFunc, m_MainFunc);
+	DDX_Check(pDX, IDC_CHECKDiffMainFunc, m_DiffMainFunc);
+	DDX_Check(pDX, IDC_CHECKPoly, m_Poly);
+	DDX_Check(pDX, IDC_CHECKDiffPoly, m_DiffPoly);
+	DDX_Check(pDX, IDC_CHECKRaznost, m_Raznost);
 }
 
 BEGIN_MESSAGE_MAP(CInterpolMetodGDlg, CDialog)
@@ -163,6 +173,7 @@ void CInterpolMetodGDlg::OnSysCommand(UINT nID, LPARAM lParam)
 //  to draw the icon.  For MFC applications using the document/view model,
 //  this is automatically done for you by the framework.
 
+
 // return sin(x) + cos(tan(x))
 double Function(double x) {
 	return alpha * sin(pow(x, beta)) + gamma * cos(tan(delta * x));
@@ -172,28 +183,34 @@ double Perer(double x) {
 	return RY2 - ((RY2 - RY1) * ((Function(x) - C) / (D - C)));
 }
 
+
 void CInterpolMetodGDlg::OnPaint()
 {
-	double x0 = RX1, y0 = Perer(A);
-	CPoint pStart(x0, y0), pCur, pPrev;
-	CPen m_NormalPen;
-	m_NormalPen.CreatePen(PS_DEFAULT, 1, RGB(0, 200, 0));
-
 	CPaintDC ClientDC(this);
 	ClientDC.Rectangle(RX1, RY1, RX2, RY2);
-	ClientDC.SelectObject(&m_NormalPen);
-	ClientDC.IntersectClipRect(RX1, RY1, RX2, RY2);
-	
-	pPrev = pStart;
-	ClientDC.MoveTo(pPrev);
-	for (double x = A; x <= B; x += (B - A) / (RX2 - RX1) * 0.1) {
 
-		pCur.x = RX1 + ((RX2 - RX1) * ((x - A) / (B - A)));
-		pCur.y = Perer(x);
+	if (m_MainFunc) {
+		double x0 = RX1, y0 = Perer(A);
+		CPoint pStart(x0, y0), pCur;
+		CPen m_NormalPen;
+		m_NormalPen.CreatePen(PS_DEFAULT, 1, RGB(0, 200, 0));
 
-		ClientDC.LineTo(pCur);
-		//::Sleep(1);
+		
+		ClientDC.SelectObject(&m_NormalPen);
+		ClientDC.IntersectClipRect(RX1, RY1, RX2, RY2);
+
+		ClientDC.MoveTo(pStart);
+		for (double x = A; x <= B; x += (B - A) / (RX2 - RX1) * 0.1) {
+
+			pCur.x = RX1 + ((RX2 - RX1) * ((x - A) / (B - A)));
+			pCur.y = Perer(x);
+
+			ClientDC.LineTo(pCur);
+			//::Sleep(1);
+		}
 	}
+
+	
 
 	//if (IsIconic())
 	//{
@@ -288,23 +305,13 @@ void CInterpolMetodGDlg::OnEnChangemu()
 }
 
 
-
-
-
-
-
 void CInterpolMetodGDlg::OnBnClickedCheckmainfunc()
 {
-	// TODO: Add your control notification handler code here
+	m_MainFunc = IsDlgButtonChecked(IDC_CHECKMainFunc);
 }
 
 
 void CInterpolMetodGDlg::OnEnChangeEditnumknots()
 {
-	// TODO:  If this is a RICHEDIT control, the control will not
-	// send this notification unless you override the CDialog::OnInitDialog()
-	// function and call CRichEditCtrl().SetEventMask()
-	// with the ENM_CHANGE flag ORed into the mask.
-
-	// TODO:  Add your control notification handler code here
+	
 }
