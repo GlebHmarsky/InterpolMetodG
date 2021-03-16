@@ -121,8 +121,62 @@ void CInterpolMetodGDlg::OnSysCommand(UINT nID, LPARAM lParam)
 //  to draw the icon.  For MFC applications using the document/view model,
 //  this is automatically done for you by the framework.
 
+#define _USE_MATH_DEFINES
+#include<math.h>
+double A = -M_PI * 5, B = M_PI / 2, C = -0.5, D = 1;
+double RX1 = 50, RY1 = 20, RX2 = 800, RY2 = 800;
+double Function(double x) {
+	return exp(x);
+}
+
+double Perer(double x) {
+	return RY2 - ((RY2 - RY1) * ((Function(x) - C) / (D - C)));
+}
+
 void CInterpolMetodGDlg::OnPaint()
 {
+
+	double x0 = RX1,
+		y0 = Perer(A),
+		scale = 15;
+
+	CPoint pStart(x0, y0), pCur, pPrev;
+	CPaintDC ClientDC(this);
+	ClientDC.Rectangle(RX1, RY1, RX2, RY2);
+	CPen m_NormalPen;
+	m_NormalPen.CreatePen(PS_DEFAULT, 1, RGB(0, 200, 0));
+	ClientDC.SelectObject(&m_NormalPen);
+
+
+	CRect ClipRect;
+	CRect DimRect;
+	CRect IntRect;
+
+
+	//ClientDC.GetClipBox(&ClipRect); // Получить недейств. область
+
+	//
+	//	
+	//	DimRect = ClientDC.Line->GetDimRect();
+	//	if (IntRect.IntersectRect(DimRect, ClipRect))
+	//		PFigure->Draw(pDC);
+
+
+	ClientDC.IntersectClipRect(RX1, RY1, RX2, RY2);
+	pPrev = pStart;
+	ClientDC.MoveTo(pPrev);
+	for (double x = A; x <= B; x += 0.01) {
+
+		pCur.x = (RX1 + ((RX2 - RX1) * ((x - A) / (B - A))));
+		pCur.y = Perer(x);
+
+		ClientDC.LineTo(pCur);
+
+
+		//::Sleep(2);
+	}
+
+
 	if (IsIconic())
 	{
 		CPaintDC dc(this); // device context for painting
@@ -139,12 +193,36 @@ void CInterpolMetodGDlg::OnPaint()
 
 		// Draw the icon
 		dc.DrawIcon(x, y, m_hIcon);
+
+
+
 	}
 	else
 	{
+		//RECT ellipse;
+		//CPaintDC dc(this);
+		//ellipse.top = 1;
+		//ellipse.left = 3;
+		//ellipse.bottom = 1 + 5;
+		//ellipse.right = 3 + 5;
+		//dc.Ellipse(&ellipse);
+
+		////Рисуем квадратик с красным бордюром (сменим перо)
+		//// и зеленой закрашенной областью (сменим кисть).
+		//CPen aPen;
+		//aPen.CreatePen(PS_SOLID, 2, RGB(255, 0, 0));
+		//CPen* pOldPen = dc.SelectObject(&aPen);
+		//CBrush aBrush;
+		//aBrush.CreateSolidBrush(RGB(0, 255, 0));
+		//CBrush* pOldBrush = dc.SelectObject(&aBrush);
+		//dc.Rectangle(50, 100, 60, 110);
+		////Восстанавливаем старые перо и кисть.
+		//dc.SelectObject(pOldPen);
+		//dc.SelectObject(pOldBrush);
 		CDialog::OnPaint();
 	}
 }
+
 
 // The system calls this function to obtain the cursor to display while the user drags
 //  the minimized window.
