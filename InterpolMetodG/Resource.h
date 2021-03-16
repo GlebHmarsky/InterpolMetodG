@@ -17,6 +17,19 @@
 #define IDC_delta                       1007
 #define IDC_epsi                        1008
 #define IDC_mu                          1009
+#define IDC_BUTTONPAINT                 1010
+#define IDC_CHECKMainFunc               1011
+#define IDC_CHECKMainFunc2              1012
+#define IDC_CHECKPoly                   1012
+#define IDC_CHECKMainFunc3              1013
+#define IDC_CHECKRaznost                1013
+#define IDC_CHECKMainFunc4              1014
+#define IDC_CHECKDiffMainFunc           1014
+#define IDC_CHECKMainFunc5              1015
+#define IDC_CHECKDiffPoly               1015
+#define IDC_CUSTOM1                     1016
+#define IDC_mu2                         1016
+#define IDC_EDITNUMKNOTS                1016
 
 // Next default values for new objects
 // 
@@ -24,7 +37,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        130
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1001
+#define _APS_NEXT_CONTROL_VALUE         1017
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
