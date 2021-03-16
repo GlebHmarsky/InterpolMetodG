@@ -18,7 +18,7 @@
 //			Глобальные переменные!
 double A, B, C, D;
 double RX1 = 50, RY1 = 20, RX2 = 800, RY2 = 800;
-
+CRect GraficRect(RX1, RY1, RX2, RY2);
 // CAboutDlg dialog used for App About
 
 class CAboutDlg : public CDialogEx
@@ -121,10 +121,10 @@ BOOL CInterpolMetodGDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
-	m_ControlBorderA.SetWindowTextW(L"-3");
-	m_ControlBorderB.SetWindowTextW(L"3");
-	m_ControlBorderC.SetWindowTextW(L"-5");
-	m_ControlBorderD.SetWindowTextW(L"5");
+	m_ControlBorderA.SetWindowTextW(L"1.55");
+	m_ControlBorderB.SetWindowTextW(L"1.58");
+	m_ControlBorderC.SetWindowTextW(L"-0.1");
+	m_ControlBorderD.SetWindowTextW(L"2.1");
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -170,56 +170,38 @@ void CInterpolMetodGDlg::OnPaint()
 	ClientDC.SelectObject(&m_NormalPen);
 
 
-	CRect ClipRect;
-	CRect DimRect;
-	CRect IntRect;
-
-
-	//ClientDC.GetClipBox(&ClipRect); // Получить недейств. область
-
-	//
-	//	
-	//	DimRect = ClientDC.Line->GetDimRect();
-	//	if (IntRect.IntersectRect(DimRect, ClipRect))
-	//		PFigure->Draw(pDC);
-
-
+	
 	ClientDC.IntersectClipRect(RX1, RY1, RX2, RY2);
 	pPrev = pStart;
 	ClientDC.MoveTo(pPrev);
-	for (double x = A; x <= B; x += 0.01) {
+	for (double x = A; x <= B; x += (B-A) / (RX2-RX1)*0.1) {
 
-		pCur.x = (RX1 + ((RX2 - RX1) * ((x - A) / (B - A))));
+		pCur.x = RX1 + ((RX2 - RX1) * ((x - A) / (B - A)));
 		pCur.y = Perer(x);
 
 		ClientDC.LineTo(pCur);
-
-
 		//::Sleep(2);
 	}
 
 
-	if (IsIconic())
-	{
-		CPaintDC dc(this); // device context for painting
-
-		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
-
-		// Center icon in client rectangle
-		int cxIcon = GetSystemMetrics(SM_CXICON);
-		int cyIcon = GetSystemMetrics(SM_CYICON);
-		CRect rect;
-		GetClientRect(&rect);
-		int x = (rect.Width() - cxIcon + 1) / 2;
-		int y = (rect.Height() - cyIcon + 1) / 2;
-
-		// Draw the icon
-		dc.DrawIcon(x, y, m_hIcon);
-	}
-	else
-	{		
-		CDialog::OnPaint();
-	}
+	//if (IsIconic())
+	//{
+	//	CPaintDC dc(this); // device context for painting
+	//	SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
+	//	// Center icon in client rectangle
+	//	int cxIcon = GetSystemMetrics(SM_CXICON);
+	//	int cyIcon = GetSystemMetrics(SM_CYICON);
+	//	CRect rect;
+	//	GetClientRect(&rect);
+	//	int x = (rect.Width() - cxIcon + 1) / 2;
+	//	int y = (rect.Height() - cyIcon + 1) / 2;
+	//	// Draw the icon
+	//	dc.DrawIcon(x, y, m_hIcon);
+	//}
+	//else
+	//{		
+	//	CDialog::OnPaint();
+	//}
 }
 
 
@@ -232,41 +214,36 @@ HCURSOR CInterpolMetodGDlg::OnQueryDragIcon()
 
 
 CString tmp;
+/*----------------------	УПРАВЛЕНИЕ ГРАНИЦАМИ	------------------------*/
 void CInterpolMetodGDlg::OnEnChangeEditA()
 {	
 	m_ControlBorderA.GetWindowTextW(tmp);
 	A = _wtof(tmp); 
-	Invalidate();
+	InvalidateRect(GraficRect);
 	UpdateWindow();
 	CInterpolMetodGDlg::OnPaint();
 }
-
-
 void CInterpolMetodGDlg::OnEnChangeEditB()
 {
 	m_ControlBorderB.GetWindowTextW(tmp);
 	B = _wtof(tmp);
-	Invalidate();
+	InvalidateRect(GraficRect);
 	UpdateWindow();
 	CInterpolMetodGDlg::OnPaint();
 }
-
-
 void CInterpolMetodGDlg::OnEnChangeEditC()
 {
 	m_ControlBorderC.GetWindowTextW(tmp);
 	C = _wtof(tmp);
-	Invalidate();
+	InvalidateRect(GraficRect);
 	UpdateWindow();
 	CInterpolMetodGDlg::OnPaint();
 }
-
-
 void CInterpolMetodGDlg::OnEnChangeEditD()
 {
 	m_ControlBorderD.GetWindowTextW(tmp);
 	D = _wtof(tmp);
-	Invalidate();
+	InvalidateRect(GraficRect);
 	UpdateWindow();
 	CInterpolMetodGDlg::OnPaint();
 }
