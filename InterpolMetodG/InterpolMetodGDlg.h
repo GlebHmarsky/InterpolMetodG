@@ -61,4 +61,8 @@ public:
 	BOOL m_Poly;
 	BOOL m_DiffPoly;
 	BOOL m_Raznost;
+	afx_msg void OnBnClickedCheckpoly();
+	afx_msg void OnBnClickedCheckraznost();
+	afx_msg void OnBnClickedCheckdiffmainfunc();
+	afx_msg void OnBnClickedCheckdiffpoly();
 };

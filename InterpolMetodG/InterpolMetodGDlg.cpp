@@ -106,6 +106,10 @@ BEGIN_MESSAGE_MAP(CInterpolMetodGDlg, CDialog)
 	ON_EN_CHANGE(IDC_EDIT_D, &CInterpolMetodGDlg::OnEnChangeEditD)
 	ON_EN_CHANGE(IDC_EDIT_C, &CInterpolMetodGDlg::OnEnChangeEditC)
 	ON_EN_CHANGE(IDC_EDIT_B, &CInterpolMetodGDlg::OnEnChangeEditB)
+	ON_BN_CLICKED(IDC_CHECKPoly, &CInterpolMetodGDlg::OnBnClickedCheckpoly)
+	ON_BN_CLICKED(IDC_CHECKRaznost, &CInterpolMetodGDlg::OnBnClickedCheckraznost)
+	ON_BN_CLICKED(IDC_CHECKDiffMainFunc, &CInterpolMetodGDlg::OnBnClickedCheckdiffmainfunc)
+	ON_BN_CLICKED(IDC_CHECKDiffPoly, &CInterpolMetodGDlg::OnBnClickedCheckdiffpoly)
 END_MESSAGE_MAP()
 
 
@@ -183,7 +187,6 @@ double Perer(double x) {
 	return RY2 - ((RY2 - RY1) * ((Function(x) - C) / (D - C)));
 }
 
-
 void CInterpolMetodGDlg::OnPaint()
 {
 	CPaintDC ClientDC(this);
@@ -195,22 +198,31 @@ void CInterpolMetodGDlg::OnPaint()
 		CPen m_NormalPen;
 		m_NormalPen.CreatePen(PS_DEFAULT, 1, RGB(0, 200, 0));
 
-		
 		ClientDC.SelectObject(&m_NormalPen);
 		ClientDC.IntersectClipRect(RX1, RY1, RX2, RY2);
 
 		ClientDC.MoveTo(pStart);
 		for (double x = A; x <= B; x += (B - A) / (RX2 - RX1) * 0.1) {
-
 			pCur.x = RX1 + ((RX2 - RX1) * ((x - A) / (B - A)));
 			pCur.y = Perer(x);
 
-			ClientDC.LineTo(pCur);
-			//::Sleep(1);
+			ClientDC.LineTo(pCur);			
 		}
 	}
+	if (m_Poly) {
 
-	
+	}
+	if (m_Raznost) {
+
+	}
+	if (m_DiffMainFunc) {
+
+	}
+	if (m_DiffPoly) {
+
+	}
+
+
 
 	//if (IsIconic())
 	//{
@@ -305,13 +317,30 @@ void CInterpolMetodGDlg::OnEnChangemu()
 }
 
 
-void CInterpolMetodGDlg::OnBnClickedCheckmainfunc()
-{
-	m_MainFunc = IsDlgButtonChecked(IDC_CHECKMainFunc);
-}
 
 
 void CInterpolMetodGDlg::OnEnChangeEditnumknots()
 {
 	
+}
+/*----------------------	УПРАВЛЕНИЕ ПОЛЯМИ ВЫВОДОВ ФУНКЦИИ	------------------------*/
+void CInterpolMetodGDlg::OnBnClickedCheckmainfunc()
+{
+	m_MainFunc = IsDlgButtonChecked(IDC_CHECKMainFunc);
+}
+void CInterpolMetodGDlg::OnBnClickedCheckpoly()
+{
+	m_Poly = IsDlgButtonChecked(IDC_CHECKPoly);
+}
+void CInterpolMetodGDlg::OnBnClickedCheckraznost()
+{
+	m_Raznost = IsDlgButtonChecked(IDC_CHECKRaznost);
+}
+void CInterpolMetodGDlg::OnBnClickedCheckdiffmainfunc()
+{
+	m_DiffMainFunc = IsDlgButtonChecked(IDC_CHECKDiffMainFunc);
+}
+void CInterpolMetodGDlg::OnBnClickedCheckdiffpoly()
+{
+	m_DiffPoly = IsDlgButtonChecked(IDC_CHECKDiffPoly);
 }
