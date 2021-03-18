@@ -1,5 +1,4 @@
-﻿
-// InterpolMetodGDlg.cpp : implementation file
+﻿// InterpolMetodGDlg.cpp : implementation file
 //
 #define _USE_MATH_DEFINES
 
@@ -148,7 +147,7 @@ BOOL CInterpolMetodGDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
-	m_ControlBorderA.SetWindowTextW(L"0");		// 1.55
+	m_ControlBorderA.SetWindowTextW(L"-4");		// 1.55
 	m_ControlBorderB.SetWindowTextW(L"4");	// 1.58
 	m_ControlBorderC.SetWindowTextW(L"-2");	// -0.1
 	m_ControlBorderD.SetWindowTextW(L"2");	// 2.1
@@ -160,7 +159,7 @@ BOOL CInterpolMetodGDlg::OnInitDialog()
 	m_ControlParamEpsi.SetWindowTextW(L"1");
 	m_ControlParamMu.SetWindowTextW(L"1");
 
-	m_NumKnoots.SetWindowTextW(L"15");
+	m_NumKnoots.SetWindowTextW(L"3");
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -189,27 +188,36 @@ double CInterpolMetodGDlg::Function(double x) {
 }
 
 double InterPoly[2][101], Values[2][101];
+double deltsY[101][101];
 
+void CInterpolMetodGDlg::DeltaY(int step) {
+	if (step >= 2*N+1) return;
+	for (int i = 0; i < 2*N+1 - step; i++)
+	{
+		deltsY[step][i] = deltsY[step-1][i+1] - deltsY[step - 1][i];
 
-double CInterpolMetodGDlg::DeltaY(int pow, int step) {
-	if (pow <= 0) {
-		/*double x = logicalCentralPoint;
-		if (step >= 0){
-			for (int i = 0; i < step; i++) {
-				x += logicalStep;
-			}
-		}
-		else {
-			for (int i = 0; i > step; i--) {
-				x -= logicalStep;
-			}
-		}
-		return -Function(x);*/
-
-		return -Values[1][step+N];
 	}
 
-	return DeltaY(pow - 1, step + 1) - DeltaY(pow - 1, step);
+	DeltaY(step + 1);
+
+	//if (pow <= 0) {
+	//	/*double x = logicalCentralPoint;
+	//	if (step >= 0){
+	//		for (int i = 0; i < step; i++) {
+	//			x += logicalStep;
+	//		}
+	//	}
+	//	else {
+	//		for (int i = 0; i > step; i--) {
+	//			x -= logicalStep;
+	//		}
+	//	}
+	//	return -Function(x);*/
+
+	//	return -Values[1][step+N];
+	//}
+
+	//return DeltaY(pow - 1, step + 1) - DeltaY(pow - 1, step);
 }
 
 void CInterpolMetodGDlg::calculateValues() {
@@ -227,10 +235,14 @@ void CInterpolMetodGDlg::CalculateDeltaY() {
 	/*-----------------		ЭТИ ПЕРЕМЕННЫЕ НЕОБХОДИМО ПЕРЕМЕСТИТЬ В НУЖНОЕ МЕСТО!!!!	------------------*/
 	logicalCentralPoint = (A + B) / 2;
 	logicalStep = (B - A) / (2 * N + 1);
-	DeltaY(2 * N, -N);
+	for (int i = 0; i < 2 * N + 1; i++) {
+		deltsY[0][i] = Values[1][i];
+	}
+	DeltaY(1);
+
 	for (int i = 1; i <= 2*N+1; i++)
 	{
-		InterPoly[0][i] = DeltaY(i,-((i)/2));
+		//InterPoly[0][i] = DeltaY(i,-((i)/2));
 	}
 }
 

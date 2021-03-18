@@ -39,7 +39,7 @@ public:
 	double RX1 = 50, RY1 = 20, RX2 = 800, RY2 = 800;
 	double Function(double x);
 	void CalculateDeltaY();
-	double DeltaY(int pow, int step);
+	void DeltaY(int step);
 	void calculateValues();
 
 	double logicalCentralPoint, logicalStep;
