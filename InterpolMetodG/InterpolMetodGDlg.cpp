@@ -190,15 +190,10 @@ double CInterpolMetodGDlg::Function(double x) {
 double InterPoly[2][101], Values[2][101];
 double deltsY[101][101];
 
-void CInterpolMetodGDlg::DeltaY(int step) {
-	if (step >= 2*N+1) return;
-	for (int i = 0; i < 2*N+1 - step; i++)
-	{
-		deltsY[step][i] = deltsY[step-1][i+1] - deltsY[step - 1][i];
-
-	}
-
-	DeltaY(step + 1);
+void CInterpolMetodGDlg::DeltaY() {
+	for (int step = 1; step < 2 * N + 1; step++)
+		for (int i = 0; i < 2 * N + 1 - step; i++)
+			deltsY[step][i] = deltsY[step - 1][i + 1] - deltsY[step - 1][i];
 
 	//if (pow <= 0) {
 	//	/*double x = logicalCentralPoint;
@@ -213,10 +208,8 @@ void CInterpolMetodGDlg::DeltaY(int step) {
 	//		}
 	//	}
 	//	return -Function(x);*/
-
 	//	return -Values[1][step+N];
 	//}
-
 	//return DeltaY(pow - 1, step + 1) - DeltaY(pow - 1, step);
 }
 
@@ -225,25 +218,22 @@ void CInterpolMetodGDlg::calculateValues() {
 	Values[1][0] = Function(A);
 	for (int i = 1; i <= 2*N+1; i++) {
 		Values[0][i] = Values[0][i-1] + logicalStep;
-		Values[1][i] = Function(Values[0][i]);
+		Values[1][i] = -Function(Values[0][i]);
 	}	
 }
 
 void CInterpolMetodGDlg::CalculateDeltaY() {
 	InterPoly[0][0] = Function(A);
-
-	/*-----------------		ЭТИ ПЕРЕМЕННЫЕ НЕОБХОДИМО ПЕРЕМЕСТИТЬ В НУЖНОЕ МЕСТО!!!!	------------------*/
-	logicalCentralPoint = (A + B) / 2;
-	logicalStep = (B - A) / (2 * N + 1);
+		
 	for (int i = 0; i < 2 * N + 1; i++) {
 		deltsY[0][i] = Values[1][i];
 	}
-	DeltaY(1);
+	DeltaY();
 
-	for (int i = 1; i <= 2*N+1; i++)
+	/*for (int i = 1; i <= 2*N+1; i++)
 	{
-		//InterPoly[0][i] = DeltaY(i,-((i)/2));
-	}
+		InterPoly[0][i] = DeltaY(i,-((i)/2));
+	}*/
 }
 
 void CInterpolMetodGDlg::OnPaint()
@@ -269,6 +259,8 @@ void CInterpolMetodGDlg::OnPaint()
 		}
 	}
 	if (m_Poly) {
+		logicalCentralPoint = (A + B) / 2;
+		logicalStep = (B - A) / (2 * N + 1);
 		calculateValues();
 		CalculateDeltaY();
 	}
