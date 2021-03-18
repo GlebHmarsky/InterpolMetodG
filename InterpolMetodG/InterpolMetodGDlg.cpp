@@ -16,10 +16,12 @@
 
 
 //			Глобальные переменные!
-double A, B, C, D;
-double RX1 = 50, RY1 = 20, RX2 = 800, RY2 = 800;
-double alpha, beta, gamma, delta, epsi, mu;
-CRect GraficRect(RX1, RY1, RX2, RY2);
+//double A, B, C, D;
+//double alpha, beta, gamma, delta, epsi, mu;
+//int N;
+//int RX1 = 50, RY1 = 20, RX2 = 800, RY2 = 800;
+
+//CRect GraficRect(RX1, RY1, RX2, RY2);
 // CAboutDlg dialog used for App About
 
 class CAboutDlg : public CDialogEx
@@ -60,10 +62,10 @@ END_MESSAGE_MAP()
 CInterpolMetodGDlg::CInterpolMetodGDlg(CWnd* pParent /*=nullptr*/)
 	: CDialog(IDD_INTERPOLMETODG_DIALOG, pParent)
 	, m_MainFunc(TRUE)
+	, m_Poly(TRUE)
+    , m_Raznost(FALSE)
 	, m_DiffMainFunc(FALSE)
-	, m_Poly(FALSE)
 	, m_DiffPoly(FALSE)
-	, m_Raznost(FALSE)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -87,6 +89,7 @@ void CInterpolMetodGDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_CHECKPoly, m_Poly);
 	DDX_Check(pDX, IDC_CHECKDiffPoly, m_DiffPoly);
 	DDX_Check(pDX, IDC_CHECKRaznost, m_Raznost);
+	DDX_Control(pDX, IDC_EDITNUMKNOTS, m_NumKnoots);
 }
 
 BEGIN_MESSAGE_MAP(CInterpolMetodGDlg, CDialog)
@@ -145,10 +148,10 @@ BOOL CInterpolMetodGDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
-	m_ControlBorderA.SetWindowTextW(L"1.55");
-	m_ControlBorderB.SetWindowTextW(L"1.58");
-	m_ControlBorderC.SetWindowTextW(L"-0.1");
-	m_ControlBorderD.SetWindowTextW(L"2.1");
+	m_ControlBorderA.SetWindowTextW(L"0");		// 1.55
+	m_ControlBorderB.SetWindowTextW(L"4");	// 1.58
+	m_ControlBorderC.SetWindowTextW(L"-2");	// -0.1
+	m_ControlBorderD.SetWindowTextW(L"2");	// 2.1
 
 	m_ControlParamAlpha.SetWindowTextW(L"1");
 	m_ControlParamBeta.SetWindowTextW(L"1");
@@ -157,6 +160,7 @@ BOOL CInterpolMetodGDlg::OnInitDialog()
 	m_ControlParamEpsi.SetWindowTextW(L"1");
 	m_ControlParamMu.SetWindowTextW(L"1");
 
+	m_NumKnoots.SetWindowTextW(L"15");
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -179,12 +183,55 @@ void CInterpolMetodGDlg::OnSysCommand(UINT nID, LPARAM lParam)
 
 
 // return sin(x) + cos(tan(x))
-double Function(double x) {
+double CInterpolMetodGDlg::Function(double x) {
+	return sin(x);
 	return alpha * sin(pow(x, beta)) + gamma * cos(tan(delta * x));
 }
 
-double Perer(double x) {
-	return RY2 - ((RY2 - RY1) * ((Function(x) - C) / (D - C)));
+double InterPoly[2][101], Values[2][101];
+
+
+double CInterpolMetodGDlg::DeltaY(int pow, int step) {
+	if (pow <= 0) {
+		/*double x = logicalCentralPoint;
+		if (step >= 0){
+			for (int i = 0; i < step; i++) {
+				x += logicalStep;
+			}
+		}
+		else {
+			for (int i = 0; i > step; i--) {
+				x -= logicalStep;
+			}
+		}
+		return -Function(x);*/
+
+		return -Values[1][step+N];
+	}
+
+	return DeltaY(pow - 1, step + 1) - DeltaY(pow - 1, step);
+}
+
+void CInterpolMetodGDlg::calculateValues() {
+	Values[0][0] = A;
+	Values[1][0] = Function(A);
+	for (int i = 1; i <= 2*N+1; i++) {
+		Values[0][i] = Values[0][i-1] + logicalStep;
+		Values[1][i] = Function(Values[0][i]);
+	}	
+}
+
+void CInterpolMetodGDlg::CalculateDeltaY() {
+	InterPoly[0][0] = Function(A);
+
+	/*-----------------		ЭТИ ПЕРЕМЕННЫЕ НЕОБХОДИМО ПЕРЕМЕСТИТЬ В НУЖНОЕ МЕСТО!!!!	------------------*/
+	logicalCentralPoint = (A + B) / 2;
+	logicalStep = (B - A) / (2 * N + 1);
+	DeltaY(2 * N, -N);
+	for (int i = 1; i <= 2*N+1; i++)
+	{
+		InterPoly[0][i] = DeltaY(i,-((i)/2));
+	}
 }
 
 void CInterpolMetodGDlg::OnPaint()
@@ -193,7 +240,7 @@ void CInterpolMetodGDlg::OnPaint()
 	ClientDC.Rectangle(RX1, RY1, RX2, RY2);
 
 	if (m_MainFunc) {
-		double x0 = RX1, y0 = Perer(A);
+		double x0 = RX1, y0 = RY2 - ((RY2 - RY1) * ((Function(A) - C) / (D - C)));
 		CPoint pStart(x0, y0), pCur;
 		CPen m_NormalPen;
 		m_NormalPen.CreatePen(PS_DEFAULT, 1, RGB(0, 200, 0));
@@ -204,13 +251,14 @@ void CInterpolMetodGDlg::OnPaint()
 		ClientDC.MoveTo(pStart);
 		for (double x = A; x <= B; x += (B - A) / (RX2 - RX1) * 0.1) {
 			pCur.x = RX1 + ((RX2 - RX1) * ((x - A) / (B - A)));
-			pCur.y = Perer(x);
+			pCur.y = RY2 - ((RY2 - RY1) * ((Function(x) - C) / (D - C)));
 
 			ClientDC.LineTo(pCur);			
 		}
 	}
 	if (m_Poly) {
-
+		calculateValues();
+		CalculateDeltaY();
 	}
 	if (m_Raznost) {
 
@@ -254,6 +302,7 @@ HCURSOR CInterpolMetodGDlg::OnQueryDragIcon()
 
 void CInterpolMetodGDlg::OnBnClickedButtonpaint()
 {
+	CRect GraficRect(RX1, RY1, RX2, RY2);
 	InvalidateRect(GraficRect);
 	UpdateWindow();
 	CInterpolMetodGDlg::OnPaint();
@@ -316,13 +365,6 @@ void CInterpolMetodGDlg::OnEnChangemu()
 	mu = _wtof(tmp);
 }
 
-
-
-
-void CInterpolMetodGDlg::OnEnChangeEditnumknots()
-{
-	
-}
 /*----------------------	УПРАВЛЕНИЕ ПОЛЯМИ ВЫВОДОВ ФУНКЦИИ	------------------------*/
 void CInterpolMetodGDlg::OnBnClickedCheckmainfunc()
 {
@@ -343,4 +385,11 @@ void CInterpolMetodGDlg::OnBnClickedCheckdiffmainfunc()
 void CInterpolMetodGDlg::OnBnClickedCheckdiffpoly()
 {
 	m_DiffPoly = IsDlgButtonChecked(IDC_CHECKDiffPoly);
+}
+
+
+void CInterpolMetodGDlg::OnEnChangeEditnumknots()
+{
+	m_NumKnoots.GetWindowTextW(tmp);
+	N = _wtof(tmp);
 }
