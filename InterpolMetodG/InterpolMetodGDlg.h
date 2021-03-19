@@ -38,6 +38,7 @@ public:
 	int N = 1;
 	double RX1 = 50, RY1 = 20, RX2 = 800, RY2 = 800;
 	double Function(double x);
+	double PolynomFunction(double x);
 	void CalculateDeltaY();
 	void calculateValues();
 

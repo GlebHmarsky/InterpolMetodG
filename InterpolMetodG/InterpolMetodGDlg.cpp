@@ -181,19 +181,34 @@ void CInterpolMetodGDlg::OnSysCommand(UINT nID, LPARAM lParam)
 //  this is automatically done for you by the framework.
 
 
+double InterPoly[2][101], Values[2][101];
+double deltsY[101][101];
+int CurrentNomKnoots;
+
+double CInterpolMetodGDlg::PolynomFunction(double x) {
+	double Result = 0;
+	Result += InterPoly[0][0]; //первое слогаемое: y0
+	InterPoly[1][0] = 1;
+	for (int i = 1; i < CurrentNomKnoots; i++){		
+		InterPoly[1][i] = InterPoly[1][i - 1] * (((x - logicalCentralPoint) / logicalStep) + (i % 2 == 0 ? -i / 2 : i / 2)) / i;
+		Result += InterPoly[1][i] * InterPoly[0][i];
+	}
+	return Result;
+}
+
+
 // return sin(x) + cos(tan(x))
 double CInterpolMetodGDlg::Function(double x) {
 	return sin(x);
 	return alpha * sin(pow(x, beta)) + gamma * cos(tan(delta * x));
 }
 
-double InterPoly[2][101], Values[2][101];
-double deltsY[101][101];
+
 
 void CInterpolMetodGDlg::calculateValues() {
 	Values[0][0] = A;
 	Values[1][0] = Function(A);
-	for (int i = 1; i <= 2*N+1; i++) {
+	for (int i = 1; i <= CurrentNomKnoots; i++) {
 		Values[0][i] = Values[0][i-1] + logicalStep;
 		Values[1][i] = -Function(Values[0][i]);
 	}	
@@ -202,20 +217,30 @@ void CInterpolMetodGDlg::calculateValues() {
 void CInterpolMetodGDlg::CalculateDeltaY() {
 	InterPoly[0][0] = Function(A);
 		
-	for (int i = 0; i < 2 * N + 1; i++) {
+	for (int i = 0; i < CurrentNomKnoots; i++) {
 		deltsY[0][i] = Values[1][i];
 	}
 
-	for (int step = 1; step < 2 * N + 1; step++)
-		for (int i = 0; i < 2 * N + 1 - step; i++)
+	for (int step = 1; step < CurrentNomKnoots; step++)
+		for (int i = 0; i < CurrentNomKnoots - step; i++)
 			deltsY[step][i] = deltsY[step - 1][i + 1] - deltsY[step - 1][i];
+
+	for (int i = 0; i < CurrentNomKnoots; i++) {
+		InterPoly[0][i] = deltsY[0][(CurrentNomKnoots - i) / 2];
+	}
 }
 
 void CInterpolMetodGDlg::OnPaint()
 {
+	CurrentNomKnoots = 2 * N + 1;
+	logicalCentralPoint = (A + B) / 2;
+	logicalStep = (B - A) / (CurrentNomKnoots);
+	calculateValues();
+	CalculateDeltaY();
+
 	CPaintDC ClientDC(this);
 	ClientDC.Rectangle(RX1, RY1, RX2, RY2);
-
+	ClientDC.IntersectClipRect(RX1, RY1, RX2, RY2);
 	if (m_MainFunc) {
 		double x0 = RX1, y0 = RY2 - ((RY2 - RY1) * ((Function(A) - C) / (D - C)));
 		CPoint pStart(x0, y0), pCur;
@@ -223,7 +248,7 @@ void CInterpolMetodGDlg::OnPaint()
 		m_NormalPen.CreatePen(PS_DEFAULT, 1, RGB(0, 200, 0));
 
 		ClientDC.SelectObject(&m_NormalPen);
-		ClientDC.IntersectClipRect(RX1, RY1, RX2, RY2);
+		
 
 		ClientDC.MoveTo(pStart);
 		for (double x = A; x <= B; x += (B - A) / (RX2 - RX1) * 0.1) {
@@ -234,10 +259,23 @@ void CInterpolMetodGDlg::OnPaint()
 		}
 	}
 	if (m_Poly) {
-		logicalCentralPoint = (A + B) / 2;
-		logicalStep = (B - A) / (2 * N + 1);
-		calculateValues();
-		CalculateDeltaY();
+		
+		
+
+		double x0 = RX1, y0 = RY2 - ((RY2 - RY1) * ((PolynomFunction(A) - C) / (D - C)));
+		CPoint pStart(x0, y0), pCur;
+		CPen m_NormalPen;
+		m_NormalPen.CreatePen(PS_DEFAULT, 1, RGB(150, 0, 0));
+
+		ClientDC.SelectObject(&m_NormalPen);
+
+		ClientDC.MoveTo(pStart);
+		for (double x = A; x <= B; x += (B - A) / (RX2 - RX1) * 0.1) {
+			pCur.x = RX1 + ((RX2 - RX1) * ((x - A) / (B - A)));
+			pCur.y = RY2 - ((RY2 - RY1) * ((PolynomFunction(x) - C) / (D - C)));
+
+			ClientDC.LineTo(pCur);
+		}
 	}
 	if (m_Raznost) {
 
