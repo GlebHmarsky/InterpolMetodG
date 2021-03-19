@@ -190,29 +190,6 @@ double CInterpolMetodGDlg::Function(double x) {
 double InterPoly[2][101], Values[2][101];
 double deltsY[101][101];
 
-void CInterpolMetodGDlg::DeltaY() {
-	for (int step = 1; step < 2 * N + 1; step++)
-		for (int i = 0; i < 2 * N + 1 - step; i++)
-			deltsY[step][i] = deltsY[step - 1][i + 1] - deltsY[step - 1][i];
-
-	//if (pow <= 0) {
-	//	/*double x = logicalCentralPoint;
-	//	if (step >= 0){
-	//		for (int i = 0; i < step; i++) {
-	//			x += logicalStep;
-	//		}
-	//	}
-	//	else {
-	//		for (int i = 0; i > step; i--) {
-	//			x -= logicalStep;
-	//		}
-	//	}
-	//	return -Function(x);*/
-	//	return -Values[1][step+N];
-	//}
-	//return DeltaY(pow - 1, step + 1) - DeltaY(pow - 1, step);
-}
-
 void CInterpolMetodGDlg::calculateValues() {
 	Values[0][0] = A;
 	Values[1][0] = Function(A);
@@ -228,12 +205,10 @@ void CInterpolMetodGDlg::CalculateDeltaY() {
 	for (int i = 0; i < 2 * N + 1; i++) {
 		deltsY[0][i] = Values[1][i];
 	}
-	DeltaY();
 
-	/*for (int i = 1; i <= 2*N+1; i++)
-	{
-		InterPoly[0][i] = DeltaY(i,-((i)/2));
-	}*/
+	for (int step = 1; step < 2 * N + 1; step++)
+		for (int i = 0; i < 2 * N + 1 - step; i++)
+			deltsY[step][i] = deltsY[step - 1][i + 1] - deltsY[step - 1][i];
 }
 
 void CInterpolMetodGDlg::OnPaint()
