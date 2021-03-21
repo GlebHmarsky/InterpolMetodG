@@ -3,7 +3,7 @@
 //
 
 #pragma once
-
+#include <atlbase.h>
 
 // CInterpolMetodGDlg dialog
 class CInterpolMetodGDlg : public CDialog
@@ -32,17 +32,22 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
+	CBitmap HeaderImage;
+	CStatic m_Pic;
+	CStatic* m_pHeader;
 	CRect m_RectColorFx, m_RectColorPnx, m_RectColorRnx, m_RectColorDFx, m_RectColorDPnx;
 	double A = 0, B = 0, C = 0, D = 0;
 	double alpha = 1, beta = 1, gamma = 1, delta = 1, epsi = 1, mu = 1;
+	double DiffDelta = 1;
 	int N = 1;
-	double RX1 = 50, RY1 = 20, RX2 = 800, RY2 = 800;
+	double RX1 = 50, RY1 = 100, RX2 = 800, RY2 = 800;
 	double Function(double x);
 	double PolynomFunction(double x);
 	void CalculateDeltaY();
 	void calculateValues();
 
-	double logicalCentralPoint, logicalStep;
+	double logicalCentralPoint; //x0
+	double logicalStep;//h
 
 
 	CEdit m_ControlBorderA;
@@ -78,11 +83,15 @@ public:
 	BOOL m_Poly;
 	BOOL m_DiffPoly;
 	BOOL m_Raznost;
+	CComboBox m_Deltas;
 
 	afx_msg void OnBnClickedCheckmainfunc();
 	afx_msg void OnBnClickedCheckpoly();
 	afx_msg void OnBnClickedCheckraznost();
 	afx_msg void OnBnClickedCheckdiffmainfunc();
-	afx_msg void OnBnClickedCheckdiffpoly();
+	afx_msg void OnBnClickedCheckdiffpoly();	
+	afx_msg void OnCbnSelchangeCombodeltas();
 
+	
+	
 };

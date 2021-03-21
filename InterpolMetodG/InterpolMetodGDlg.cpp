@@ -89,6 +89,8 @@ void CInterpolMetodGDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_CHECKDiffPoly, m_DiffPoly);
 	DDX_Check(pDX, IDC_CHECKRaznost, m_Raznost);
 	DDX_Control(pDX, IDC_EDITNUMKNOTS, m_NumKnoots);
+	DDX_Control(pDX, IDC_ComboDeltas, m_Deltas);
+	DDX_Control(pDX, IDC_HEADER, m_Pic);
 }
 
 BEGIN_MESSAGE_MAP(CInterpolMetodGDlg, CDialog)
@@ -112,6 +114,7 @@ BEGIN_MESSAGE_MAP(CInterpolMetodGDlg, CDialog)
 	ON_BN_CLICKED(IDC_CHECKRaznost, &CInterpolMetodGDlg::OnBnClickedCheckraznost)
 	ON_BN_CLICKED(IDC_CHECKDiffMainFunc, &CInterpolMetodGDlg::OnBnClickedCheckdiffmainfunc)
 	ON_BN_CLICKED(IDC_CHECKDiffPoly, &CInterpolMetodGDlg::OnBnClickedCheckdiffpoly)
+	ON_CBN_SELCHANGE(IDC_ComboDeltas, &CInterpolMetodGDlg::OnCbnSelchangeCombodeltas)
 END_MESSAGE_MAP()
 
 
@@ -158,8 +161,9 @@ BOOL CInterpolMetodGDlg::OnInitDialog()
 	m_ControlParamDelta.SetWindowTextW(L"1");
 	m_ControlParamEpsi.SetWindowTextW(L"1");
 	m_ControlParamMu.SetWindowTextW(L"1");
-
+	
 	m_NumKnoots.SetWindowTextW(L"50");
+	m_Deltas.SetCurSel(2);
 
 	int BorderH, BorderV;
 	GetDlgItem(IDC_ColorFx)->GetWindowRect(&m_RectColorFx);
@@ -184,8 +188,18 @@ BOOL CInterpolMetodGDlg::OnInitDialog()
 	ScreenToClient(&m_RectColorDPnx);
 	m_RectColorDPnx.InflateRect(-BorderH, -BorderV, -BorderH, -BorderV + 5);
 
+	//m_Image.Load(L"R:\\Programming\\C++\\ЧМ\\InterpolMetodG\\Заголовок.bmp");
+	m_pHeader = (CStatic*)GetDlgItem(IDC_HEADER);
+	HeaderImage.LoadBitmap(MAKEINTRESOURCE(IDB_BITMAP1));//(HBITMAP)LoadImage(NULL, L"R:\\Programming\\C++\\ЧМ\\InterpolMetodG\\Заголовок.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	m_pHeader->SetBitmap(HeaderImage);
+	m_Pic.SetBitmap(HeaderImage);
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
+
+
+//				L"R:\\Programming\\C++\\ЧМ\\InterpolMetodG\\Заголовок.bmp"
+
+
 
 void CInterpolMetodGDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
@@ -348,13 +362,51 @@ void CInterpolMetodGDlg::OnPaint()
 		ClientDC.MoveTo(MaxX,RY1);
 		ClientDC.LineTo(MaxX, RY2);
 	}
-	if (m_DiffMainFunc) {
+	if (m_DiffMainFunc) {		
+		double x0 = RX1, y0 = RY2 - ((RY2 - RY1) * (((Function(A + DiffDelta)- Function(A))/ DiffDelta - C) / (D - C)));
+		CPoint pStart(x0, y0), pCur;
 		CPen m_NormalPen;
 		m_NormalPen.CreatePen(PS_DEFAULT, 1, RGB(120, 0, 220));
+
+		ClientDC.SelectObject(&m_NormalPen);
+
+
+		ClientDC.MoveTo(pStart);
+		for (double x = A; x <= B; x += (B - A) / (RX2 - RX1) * 0.1) {
+			pCur.x = RX1 + ((RX2 - RX1) * ((x - A) / (B - A)));
+			pCur.y = RY2 - ((RY2 - RY1) * (((Function(x + DiffDelta) - Function(x)) / DiffDelta - C) / (D - C)));
+
+			ClientDC.LineTo(pCur);
+		}
 	}
 	if (m_DiffPoly) {
+		
+		double x0 = RX1, y0 = RY2 - ((RY2 - RY1) * (((Function(A + DiffDelta) - Function(A)) / DiffDelta - C) / (D - C))); // Must be PolynomFunction(A)
+		CPoint pStart(x0, y0), pCur;
 		CPen m_NormalPen;
 		m_NormalPen.CreatePen(PS_DEFAULT, 1, RGB(60, 0, 110));
+
+		ClientDC.SelectObject(&m_NormalPen);
+		double Result2;
+		ClientDC.MoveTo(pStart);
+		for (double x = A; x < B; x += (B - A) / (RX2 - RX1) * 0.1) {
+			pCur.x = RX1 + ((RX2 - RX1) * ((x - A) / (B - A)));
+			Result = PolynomFunction(x + DiffDelta);
+			if (Result > 100000)
+				Result = 100000;
+			if (Result < -100000)
+				Result = -100000;
+
+			Result2 = PolynomFunction(x);
+			if (Result2 > 100001)
+				Result2 = 100001;
+			if (Result2 < -100001)
+				Result2 = -100001;
+			pCur.y = RY2 - ((RY2 - RY1) * (((Result-Result2) / DiffDelta - C) / (D - C)));
+
+			ClientDC.LineTo(pCur);
+		}
+		if (N > 2) ClientDC.LineTo(RX2, RY2 - ((RY2 - RY1) * (((Function(B + DiffDelta) - Function(B)) / DiffDelta - C) / (D - C)))); //Этой строки вообще не должно быть, но переполнение надо фиксить
 	}
 	
 	/*
@@ -502,4 +554,13 @@ void CInterpolMetodGDlg::OnEnChangeEditnumknots()
 {
 	m_NumKnoots.GetWindowTextW(tmp);
 	N = _wtof(tmp);
+}
+
+
+
+void CInterpolMetodGDlg::OnCbnSelchangeCombodeltas()
+{	
+	int n = m_Deltas.GetCurSel();
+	m_Deltas.GetLBText(n, tmp);
+	DiffDelta = _wtof(tmp);
 }
