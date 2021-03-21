@@ -30,6 +30,11 @@
 #define IDC_CUSTOM1                     1016
 #define IDC_mu2                         1016
 #define IDC_EDITNUMKNOTS                1016
+#define IDC_ColorFx                     1017
+#define IDC_ColorPnx                    1018
+#define IDC_ColorRnx                    1019
+#define IDC_ColorDfx                    1020
+#define IDC_ColorDPnx                   1021
 
 // Next default values for new objects
 // 
@@ -37,7 +42,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        130
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1017
+#define _APS_NEXT_CONTROL_VALUE         1022
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

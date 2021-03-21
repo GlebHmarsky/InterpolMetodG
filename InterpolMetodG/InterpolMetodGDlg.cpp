@@ -160,6 +160,30 @@ BOOL CInterpolMetodGDlg::OnInitDialog()
 	m_ControlParamMu.SetWindowTextW(L"1");
 
 	m_NumKnoots.SetWindowTextW(L"50");
+
+	int BorderH, BorderV;
+	GetDlgItem(IDC_ColorFx)->GetWindowRect(&m_RectColorFx);
+	ScreenToClient(&m_RectColorFx);
+	BorderH = (m_RectColorFx.right - m_RectColorFx.left) / 40;
+	BorderV = (m_RectColorFx.bottom - m_RectColorFx.top) / 5 ;
+	m_RectColorFx.InflateRect(-BorderH, -BorderV, -BorderH, -BorderV+5);
+
+	GetDlgItem(IDC_ColorPnx)->GetWindowRect(&m_RectColorPnx);
+	ScreenToClient(&m_RectColorPnx);
+	m_RectColorPnx.InflateRect(-BorderH, -BorderV, -BorderH, -BorderV + 5);
+
+	GetDlgItem(IDC_ColorRnx)->GetWindowRect(&m_RectColorRnx);
+	ScreenToClient(&m_RectColorRnx);
+	m_RectColorRnx.InflateRect(-BorderH, -BorderV, -BorderH, -BorderV + 5);
+
+	GetDlgItem(IDC_ColorDfx)->GetWindowRect(&m_RectColorDFx);
+	ScreenToClient(&m_RectColorDFx);
+	m_RectColorDFx.InflateRect(-BorderH, -BorderV, -BorderH, -BorderV + 5);
+	
+	GetDlgItem(IDC_ColorDPnx)->GetWindowRect(&m_RectColorDPnx);
+	ScreenToClient(&m_RectColorDPnx);
+	m_RectColorDPnx.InflateRect(-BorderH, -BorderV, -BorderH, -BorderV + 5);
+
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -181,8 +205,8 @@ void CInterpolMetodGDlg::OnSysCommand(UINT nID, LPARAM lParam)
 //  this is automatically done for you by the framework.
 
 
-double InterPoly[2][101], Values[2][101];
-double deltsY[101][101];
+double InterPoly[2][210], Values[2][210];
+double deltsY[210][210];
 int CurrentNomKnoots;
 
 double CInterpolMetodGDlg::PolynomFunction(double x) {
@@ -234,10 +258,9 @@ void CInterpolMetodGDlg::OnPaint()
 
 	CPaintDC ClientDC(this);
 	ClientDC.Rectangle(RX1, RY1, RX2, RY2);
-	ClientDC.IntersectClipRect(RX1, RY1, RX2, RY2);
+	ClientDC.IntersectClipRect(RX1, RY1, 2*RX2, RY2);
 
 	CPen m_LinePen;
-
 	
 	/*--- ЛИНИИ ----*/
 	m_LinePen.CreatePen(PS_DEFAULT, 1, RGB(200, 200, 200));
@@ -251,7 +274,7 @@ void CInterpolMetodGDlg::OnPaint()
 
 	calculateValues();
 	CalculateDeltaY();
-	
+	double Result = 0;
 	if (m_MainFunc) {
 		double x0 = RX1, y0 = RY2 - ((RY2 - RY1) * ((Function(A) - C) / (D - C)));
 		CPoint pStart(x0, y0), pCur;
@@ -270,20 +293,26 @@ void CInterpolMetodGDlg::OnPaint()
 		}
 	}
 	if (m_Poly) {
-		double x0 = RX1, y0 = RY2 - ((RY2 - RY1) * ((PolynomFunction(A) - C) / (D - C)));
+		double x0 = RX1, y0 = RY2 - ((RY2 - RY1) * ((Function(A) - C) / (D - C))); // Must be PolynomFunction(A)
 		CPoint pStart(x0, y0), pCur;
-		CPen m_NormalPen;
+		CPen m_NormalPen;		
 		m_NormalPen.CreatePen(PS_DEFAULT, 1, RGB(252, 132, 6));
 
 		ClientDC.SelectObject(&m_NormalPen);
 
 		ClientDC.MoveTo(pStart);
-		for (double x = A; x <= B; x += (B - A) / (RX2 - RX1) * 0.1) {
+		for (double x = A; x < B; x += (B - A) / (RX2 - RX1) * 0.1) {
 			pCur.x = RX1 + ((RX2 - RX1) * ((x - A) / (B - A)));
-			pCur.y = RY2 - ((RY2 - RY1) * ((PolynomFunction(x) - C) / (D - C)));
+			Result = PolynomFunction(x);
+			if (Result > 100000)
+				Result = 100000; 
+			if (Result < -100000)
+				Result = -100000;
+			pCur.y = RY2 - ((RY2 - RY1) * ((Result - C) / (D - C)));
 
 			ClientDC.LineTo(pCur);
 		}
+		if(N>2) ClientDC.LineTo(RX2, RY2 - ((RY2 - RY1) * ((Function(B) - C) / (D - C)))); //Этой строки вообще не должно быть, но переполнение надо фиксить
 	}
 	if (m_Raznost) {
 		double x0 = RX1, y0 = RY2 - ((RY2 - RY1) * ((PolynomFunction(A) - C) / (D - C)));
@@ -294,12 +323,21 @@ void CInterpolMetodGDlg::OnPaint()
 		ClientDC.SelectObject(&m_NormalPen);
 
 		ClientDC.MoveTo(pStart);
-		double MaxY = 0, MaxX=0;
+		double MaxY = y0, MaxX= x0;
 		for (double x = A; x <= B; x += (B - A) / (RX2 - RX1) * 0.1) {
 			pCur.x = RX1 + ((RX2 - RX1) * ((x - A) / (B - A)));
+			Result = PolynomFunction(x);
+			if (Result > 100000)
+				Result = 100000;			
+			if (Result < -100000)
+				Result = -100000;
 			
-			pCur.y = RY2 - ((RY2 - RY1) * (abs(Function(x) - PolynomFunction(x)) - C) / (D - C));
-			if (MaxY < pCur.y) MaxX = pCur.x;
+			pCur.y = RY2 - ((RY2 - RY1) * (abs(Function(x) - Result) - C) / (D - C));
+
+			if (MaxY > pCur.y) {
+				MaxY = pCur.y;
+				MaxX = pCur.x;
+			}
 			ClientDC.LineTo(pCur);
 		}
 		
@@ -315,10 +353,34 @@ void CInterpolMetodGDlg::OnPaint()
 		m_NormalPen.CreatePen(PS_DEFAULT, 1, RGB(120, 0, 220));
 	}
 	if (m_DiffPoly) {
-
+		CPen m_NormalPen;
+		m_NormalPen.CreatePen(PS_DEFAULT, 1, RGB(60, 0, 110));
 	}
+	
+	/*
+	GetDlgItem(IDC_ColorFx)->GetWindowRect(&m_RectColorFx);
+	ScreenToClient(&m_RectColorFx);
+	GetDlgItem(IDC_ColorFx)->GetWindowRect(&m_RectColorPnx);
+	ScreenToClient(&m_RectColorPnx);
+	GetDlgItem(IDC_ColorFx)->GetWindowRect(&m_RectColorRnx);
+	ScreenToClient(&m_RectColorRnx);
+	GetDlgItem(IDC_ColorFx)->GetWindowRect(&m_RectColorDFx);
+	ScreenToClient(&m_RectColorDFx);
+	GetDlgItem(IDC_ColorFx)->GetWindowRect(&m_RectColorDPnx);
+	ScreenToClient(&m_RectColorDPnx);
+	*/
 
 
+	CBrush BrushFx(RGB(10, 184, 10));
+	ClientDC.FillRect(&m_RectColorFx, &BrushFx);
+	CBrush BrushPnx(RGB(252, 132, 6));
+	ClientDC.FillRect(&m_RectColorPnx, &BrushPnx);
+	CBrush BrushRnx(RGB(18, 83, 166));
+	ClientDC.FillRect(&m_RectColorRnx, &BrushRnx);
+	CBrush BrushDfx(RGB(120, 0, 220));
+	ClientDC.FillRect(&m_RectColorDFx, &BrushDfx);
+	CBrush BrushDPnx(RGB(40, 0, 100));
+	ClientDC.FillRect(&m_RectColorDPnx, &BrushDPnx);
 
 	//if (IsIconic())
 	//{
