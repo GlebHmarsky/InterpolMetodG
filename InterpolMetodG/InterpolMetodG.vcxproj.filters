@@ -62,5 +62,17 @@
     <Image Include="res\InterpolMetodG.ico">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\bitmap1.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Picture2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Header5.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Header6.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

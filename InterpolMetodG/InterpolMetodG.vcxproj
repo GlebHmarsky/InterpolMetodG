@@ -208,6 +208,10 @@
     <None Include="res\InterpolMetodG.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\Header5.bmp" />
+    <Image Include="..\Header6.bmp" />
+    <Image Include="..\Picture2.bmp" />
+    <Image Include="res\bitmap1.bmp" />
     <Image Include="res\InterpolMetodG.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

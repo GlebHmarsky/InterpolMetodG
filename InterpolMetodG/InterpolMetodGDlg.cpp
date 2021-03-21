@@ -90,7 +90,6 @@ void CInterpolMetodGDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_CHECKRaznost, m_Raznost);
 	DDX_Control(pDX, IDC_EDITNUMKNOTS, m_NumKnoots);
 	DDX_Control(pDX, IDC_ComboDeltas, m_Deltas);
-	DDX_Control(pDX, IDC_HEADER, m_Pic);
 }
 
 BEGIN_MESSAGE_MAP(CInterpolMetodGDlg, CDialog)
@@ -188,11 +187,6 @@ BOOL CInterpolMetodGDlg::OnInitDialog()
 	ScreenToClient(&m_RectColorDPnx);
 	m_RectColorDPnx.InflateRect(-BorderH, -BorderV, -BorderH, -BorderV + 5);
 
-	//m_Image.Load(L"R:\\Programming\\C++\\ЧМ\\InterpolMetodG\\Заголовок.bmp");
-	m_pHeader = (CStatic*)GetDlgItem(IDC_HEADER);
-	HeaderImage.LoadBitmap(MAKEINTRESOURCE(IDB_BITMAP1));//(HBITMAP)LoadImage(NULL, L"R:\\Programming\\C++\\ЧМ\\InterpolMetodG\\Заголовок.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	m_pHeader->SetBitmap(HeaderImage);
-	m_Pic.SetBitmap(HeaderImage);
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 

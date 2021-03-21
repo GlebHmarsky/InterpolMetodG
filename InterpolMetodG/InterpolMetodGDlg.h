@@ -32,9 +32,7 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
-	CBitmap HeaderImage;
-	CStatic m_Pic;
-	CStatic* m_pHeader;
+	
 	CRect m_RectColorFx, m_RectColorPnx, m_RectColorRnx, m_RectColorDFx, m_RectColorDPnx;
 	double A = 0, B = 0, C = 0, D = 0;
 	double alpha = 1, beta = 1, gamma = 1, delta = 1, epsi = 1, mu = 1;
@@ -91,7 +89,5 @@ public:
 	afx_msg void OnBnClickedCheckdiffmainfunc();
 	afx_msg void OnBnClickedCheckdiffpoly();	
 	afx_msg void OnCbnSelchangeCombodeltas();
-
-	
-	
+		
 };
