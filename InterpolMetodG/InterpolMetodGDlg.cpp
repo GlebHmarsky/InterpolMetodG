@@ -187,6 +187,7 @@ BOOL CInterpolMetodGDlg::OnInitDialog()
 	ScreenToClient(&m_RectColorDPnx);
 	m_RectColorDPnx.InflateRect(-BorderH, -BorderV, -BorderH, -BorderV + 5);
 
+	this->SetWindowText(_T("Интерполяция методом Гаусса. Хмарский Глеб ИВТ-31"));
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
