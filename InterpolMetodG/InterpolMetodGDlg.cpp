@@ -274,12 +274,14 @@ void CInterpolMetodGDlg::OnPaint()
 	/*--- ЛИНИИ ----*/
 	m_LinePen.CreatePen(PS_DEFAULT, 1, RGB(200, 200, 200));
 	ClientDC.SelectObject(&m_LinePen);
-	for (int pos = RY1; pos < RY2; pos+=(RY2-RY1)/6){
+	for (int pos = RY1 + (RY2 - RY1) / 6; pos < RY2; pos += (RY2 - RY1) / 6){
 		ClientDC.MoveTo(RX1, pos);
 		ClientDC.LineTo(RX2, pos);
 	}
-	ClientDC.TextOutW(RX1 + 10, RY1 + 40, L"Привет;)");
-
+	for (int pos = RX1 + (RX2 - RX1) / 6; pos < RX2; pos += (RX2 - RX1) / 6) {
+		ClientDC.MoveTo(pos, RY1);
+		ClientDC.LineTo(pos, RY2);
+	}
 
 	calculateValues();
 	CalculateDeltaY();
@@ -332,7 +334,7 @@ void CInterpolMetodGDlg::OnPaint()
 		ClientDC.SelectObject(&m_NormalPen);
 
 		ClientDC.MoveTo(pStart);
-		double MaxY = y0, MaxX= x0;
+		double MaxY = y0, MaxX= x0, СurY = 0;
 		for (double x = A; x <= B; x += (B - A) / (RX2 - RX1) * 0.1) {
 			pCur.x = RX1 + ((RX2 - RX1) * ((x - A) / (B - A)));
 			Result = PolynomFunction(x);
@@ -341,10 +343,10 @@ void CInterpolMetodGDlg::OnPaint()
 			if (Result < -100000)
 				Result = -100000;
 			
-			pCur.y = RY2 - ((RY2 - RY1) * (abs(Function(x) - Result) - C) / (D - C));
+			pCur.y = СurY = RY2 - ((RY2 - RY1) * (abs(Function(x) - Result) - C) / (D - C));
 
-			if (MaxY > pCur.y) {
-				MaxY = pCur.y;
+			if (MaxY > СurY) {
+				MaxY = СurY;
 				MaxX = pCur.x;
 			}
 			ClientDC.LineTo(pCur);
@@ -404,18 +406,6 @@ void CInterpolMetodGDlg::OnPaint()
 		if (N > 2) ClientDC.LineTo(RX2, RY2 - ((RY2 - RY1) * (((Function(B + DiffDelta) - Function(B)) / DiffDelta - C) / (D - C)))); //Этой строки вообще не должно быть, но переполнение надо фиксить
 	}
 	
-	/*
-	GetDlgItem(IDC_ColorFx)->GetWindowRect(&m_RectColorFx);
-	ScreenToClient(&m_RectColorFx);
-	GetDlgItem(IDC_ColorFx)->GetWindowRect(&m_RectColorPnx);
-	ScreenToClient(&m_RectColorPnx);
-	GetDlgItem(IDC_ColorFx)->GetWindowRect(&m_RectColorRnx);
-	ScreenToClient(&m_RectColorRnx);
-	GetDlgItem(IDC_ColorFx)->GetWindowRect(&m_RectColorDFx);
-	ScreenToClient(&m_RectColorDFx);
-	GetDlgItem(IDC_ColorFx)->GetWindowRect(&m_RectColorDPnx);
-	ScreenToClient(&m_RectColorDPnx);
-	*/
 
 
 	CBrush BrushFx(RGB(10, 184, 10));
@@ -429,24 +419,6 @@ void CInterpolMetodGDlg::OnPaint()
 	CBrush BrushDPnx(RGB(40, 0, 100));
 	ClientDC.FillRect(&m_RectColorDPnx, &BrushDPnx);
 
-	//if (IsIconic())
-	//{
-	//	CPaintDC dc(this); // device context for painting
-	//	SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
-	//	// Center icon in client rectangle
-	//	int cxIcon = GetSystemMetrics(SM_CXICON);
-	//	int cyIcon = GetSystemMetrics(SM_CYICON);
-	//	CRect rect;
-	//	GetClientRect(&rect);
-	//	int x = (rect.Width() - cxIcon + 1) / 2;
-	//	int y = (rect.Height() - cyIcon + 1) / 2;
-	//	// Draw the icon
-	//	dc.DrawIcon(x, y, m_hIcon);
-	//}
-	//else
-	//{		
-	//	CDialog::OnPaint();
-	//}
 }
 
 
