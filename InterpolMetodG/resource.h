@@ -7,6 +7,7 @@
 #define IDS_ABOUTBOX                    101
 #define IDD_INTERPOLMETODG_DIALOG       102
 #define IDR_MAINFRAME                   128
+#define IDB_BITMAP3                     134
 #define IDC_EDIT_A                      1000
 #define IDC_EDIT_B                      1001
 #define IDC_EDIT_C                      1002
@@ -43,7 +44,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        131
+#define _APS_NEXT_RESOURCE_VALUE        135
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         1026
 #define _APS_NEXT_SYMED_VALUE           101
