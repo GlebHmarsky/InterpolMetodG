@@ -150,9 +150,9 @@ BOOL CInterpolMetodGDlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 	m_ControlBorderA.SetWindowTextW(L"-1");		// 1.55
-	m_ControlBorderB.SetWindowTextW(L"0");	// 1.58
-	m_ControlBorderC.SetWindowTextW(L"-2");	// -0.1
-	m_ControlBorderD.SetWindowTextW(L"2");	// 2.1
+	m_ControlBorderB.SetWindowTextW(L"2");		// 1.58
+	m_ControlBorderC.SetWindowTextW(L"-1.5");	// -0.1
+	m_ControlBorderD.SetWindowTextW(L"3");		// 2.1
 
 	m_ControlParamAlpha.SetWindowTextW(L"1");
 	m_ControlParamBeta.SetWindowTextW(L"1");
@@ -161,7 +161,7 @@ BOOL CInterpolMetodGDlg::OnInitDialog()
 	m_ControlParamEpsi.SetWindowTextW(L"1");
 	m_ControlParamMu.SetWindowTextW(L"1");
 	
-	m_NumKnoots.SetWindowTextW(L"50");
+	m_NumKnoots.SetWindowTextW(L"30");
 	m_Deltas.SetCurSel(2);
 
 	int BorderH, BorderV;
@@ -232,7 +232,7 @@ double CInterpolMetodGDlg::PolynomFunction(double x) {
 // return sin(x) + cos(tan(x))
 double CInterpolMetodGDlg::Function(double x) {
 	//return sin(x);
-	return alpha * sin(pow(x, beta)) + gamma * cos(tan(delta * x));
+	return alpha * sin(pow(abs(x), beta)) + gamma * cos(tan(delta * x));
 }
 
 void CInterpolMetodGDlg::calculateValues() {
@@ -266,19 +266,19 @@ void CInterpolMetodGDlg::OnPaint()
 	
 
 	CPaintDC ClientDC(this);
-	ClientDC.Rectangle(RX1, RY1, RX2, RY2);
-	ClientDC.IntersectClipRect(RX1, RY1, 2*RX2, RY2);
+	ClientDC.Rectangle(RX1-1, RY1, RX2+1, RY2);
+	ClientDC.IntersectClipRect(RX1-1, RY1, 2*RX2, RY2);
 
 	CPen m_LinePen;
 	
 	/*--- ЛИНИИ ----*/
 	m_LinePen.CreatePen(PS_DEFAULT, 1, RGB(200, 200, 200));
 	ClientDC.SelectObject(&m_LinePen);
-	for (int pos = RY1 + (RY2 - RY1) / 6; pos < RY2; pos += (RY2 - RY1) / 6){
+	for (int pos = RY1 + (RY2 - RY1) / 6; pos < RY2; pos += (RY2 - RY1) / 6 + 1){
 		ClientDC.MoveTo(RX1, pos);
 		ClientDC.LineTo(RX2, pos);
 	}
-	for (int pos = RX1 + (RX2 - RX1) / 6; pos < RX2; pos += (RX2 - RX1) / 6) {
+	for (int pos = RX1 + (RX2 - RX1) / 6; pos < RX2; pos += (RX2 - RX1) / 6 + 1) {
 		ClientDC.MoveTo(pos, RY1);
 		ClientDC.LineTo(pos, RY2);
 	}
@@ -296,7 +296,7 @@ void CInterpolMetodGDlg::OnPaint()
 		
 
 		ClientDC.MoveTo(pStart);
-		for (double x = A; x <= B; x += (B - A) / (RX2 - RX1) * 0.1) {
+		for (double x = A; x <= B; x += (B - A) / (RX2 - RX1) * 0.05) {
 			pCur.x = RX1 + ((RX2 - RX1) * ((x - A) / (B - A)));
 			pCur.y = RY2 - ((RY2 - RY1) * ((Function(x) - C) / (D - C)));
 
@@ -312,7 +312,7 @@ void CInterpolMetodGDlg::OnPaint()
 		ClientDC.SelectObject(&m_NormalPen);
 
 		ClientDC.MoveTo(pStart);
-		for (double x = A; x < B; x += (B - A) / (RX2 - RX1) * 0.1) {
+		for (double x = A; x < B; x += (B - A) / (RX2 - RX1) * 0.05) {
 			pCur.x = RX1 + ((RX2 - RX1) * ((x - A) / (B - A)));
 			Result = PolynomFunction(x);
 			if (Result > 100000)
@@ -323,10 +323,10 @@ void CInterpolMetodGDlg::OnPaint()
 
 			ClientDC.LineTo(pCur);
 		}
-		if(N>2) ClientDC.LineTo(RX2, RY2 - ((RY2 - RY1) * ((Function(B) - C) / (D - C)))); //Этой строки вообще не должно быть, но переполнение надо фиксить
+		if(N>1) ClientDC.LineTo(RX2, RY2 - ((RY2 - RY1) * ((Function(B) - C) / (D - C)))); //Этой строки вообще не должно быть, но переполнение надо фиксить
 	}
 	if (m_Raznost) {
-		double x0 = RX1, y0 = RY2 - ((RY2 - RY1) * ((PolynomFunction(A) - C) / (D - C)));
+		double x0 = RX1, y0 = RY2 - ((RY2 - RY1) * ((Function(A) - C) / (D - C)));
 		CPoint pStart(x0, y0), pCur;
 		CPen m_NormalPen;
 		m_NormalPen.CreatePen(PS_DEFAULT, 1, RGB(18, 83, 166));
@@ -334,8 +334,8 @@ void CInterpolMetodGDlg::OnPaint()
 		ClientDC.SelectObject(&m_NormalPen);
 
 		ClientDC.MoveTo(pStart);
-		double MaxY = y0, MaxX= x0, СurY = 0;
-		for (double x = A; x <= B; x += (B - A) / (RX2 - RX1) * 0.1) {
+		double MaxY = y0, MaxX= x0, СurY = y0;
+		for (double x = A; x < B; x += (B - A) / (RX2 - RX1) * 0.1) {
 			pCur.x = RX1 + ((RX2 - RX1) * ((x - A) / (B - A)));
 			Result = PolynomFunction(x);
 			if (Result > 100000)
@@ -378,7 +378,7 @@ void CInterpolMetodGDlg::OnPaint()
 	}
 	if (m_DiffPoly) {
 		
-		double x0 = RX1, y0 = RY2 - ((RY2 - RY1) * (((Function(A + DiffDelta) - Function(A)) / DiffDelta - C) / (D - C))); // Must be PolynomFunction(A)
+		double x0 = RX1, y0 = RY2 - ((RY2 - RY1) * (((PolynomFunction(A + DiffDelta) - PolynomFunction(A)) / DiffDelta - C) / (D - C))); // Must be PolynomFunction(A)
 		CPoint pStart(x0, y0), pCur;
 		CPen m_NormalPen;
 		m_NormalPen.CreatePen(PS_DEFAULT, 1, RGB(60, 0, 110));
@@ -389,16 +389,16 @@ void CInterpolMetodGDlg::OnPaint()
 		for (double x = A; x < B; x += (B - A) / (RX2 - RX1) * 0.1) {
 			pCur.x = RX1 + ((RX2 - RX1) * ((x - A) / (B - A)));
 			Result = PolynomFunction(x + DiffDelta);
-			if (Result > 100000)
-				Result = 100000;
-			if (Result < -100000)
-				Result = -100000;
+			if (Result > 1000000)
+				Result = 1000000;
+			if (Result < -1000000)
+				Result = -1000000;
 
 			Result2 = PolynomFunction(x);
-			if (Result2 > 100001)
-				Result2 = 100001;
-			if (Result2 < -100001)
-				Result2 = -100001;
+			if (Result2 > 1001000)
+				Result2 = 1001000;
+			if (Result2 < -1001000)
+				Result2 = -1001000;
 			pCur.y = RY2 - ((RY2 - RY1) * (((Result-Result2) / DiffDelta - C) / (D - C)));
 
 			ClientDC.LineTo(pCur);
@@ -431,7 +431,7 @@ HCURSOR CInterpolMetodGDlg::OnQueryDragIcon()
 
 void CInterpolMetodGDlg::OnBnClickedButtonpaint()
 {
-	CRect GraficRect(RX1, RY1, RX2, RY2);
+	CRect GraficRect(RX1-2, RY1, RX2+2, RY2);
 	InvalidateRect(GraficRect);
 	UpdateWindow();
 	CInterpolMetodGDlg::OnPaint();
